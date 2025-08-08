@@ -117,10 +117,11 @@ class MemeBot:
         import requests
         print(f"[DEBUG] meme_path: {meme_path}")
         # Construct the full URL for downloading alternative meme
+        base_url = BotConfig.FLASK_SERVER_URL.replace("/upload", "")
         if meme_path.startswith("/"):
-            new_meme_url = BotConfig.FLASK_SERVER_URL.replace("/upload", meme_path)
+            new_meme_url = base_url + meme_path
         else:
-            new_meme_url = BotConfig.FLASK_SERVER_URL.replace("/upload", "/" + meme_path)
+            new_meme_url = base_url + "/" + meme_path
         print(f"[DEBUG] new_meme_url: {new_meme_url}")
 
         temp_filename = os.path.join(BotConfig.TEMP_DIR, "alt_" + os.path.basename(meme_path))
@@ -235,10 +236,11 @@ class MemeBot:
         meme_path = result.get("meme", "")
         
         # Download and send the new meme
+        base_url = BotConfig.FLASK_SERVER_URL.replace("/upload", "")
         if meme_path.startswith("/"):
-            new_url = BotConfig.FLASK_SERVER_URL.replace("/upload", meme_path)
+            new_url = base_url + meme_path
         else:
-            new_url = BotConfig.FLASK_SERVER_URL.replace("/upload", "/" + meme_path)
+            new_url = base_url + "/" + meme_path
         
         temp_fn = os.path.join(BotConfig.TEMP_DIR, f"temp_{os.path.basename(meme_path)}")
         urllib.request.urlretrieve(new_url, temp_fn)
