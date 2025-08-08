@@ -227,12 +227,8 @@ def classification(meme):
         if not extracted_text or len(extracted_text.strip()) == 0:
             extracted_text = "No text found"
         
-        # Call text classification with explicit parameters
-        text_model_result = text_classification(
-            extracted_text[:512],  # Truncate to avoid memory issues
-            padding=True,
-            truncation=True
-        )
+        # Call text classification with just the text (parameters handled in pipeline setup)
+        text_model_result = text_classification(extracted_text[:512])  # Truncate to avoid memory issues
         # Interpret model result
         raw_label = text_model_result[0]['label']
         if raw_label.lower() in ['hate', 'offensive', 'toxic', 'label_1']:
