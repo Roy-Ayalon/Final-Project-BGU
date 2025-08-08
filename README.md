@@ -178,7 +178,7 @@ telegram_bot/
 ### Video Demonstration
 🎥 **Bot in Action**
 
-https://github.com/Roy-Ayalon/telegram_bot/assets/demo_video.mov
+https://github.com/user-attachments/assets/1df2b1dd-0875-4bd0-8f69-bcf716c38e6c
 
 *See how the Telegram Meme Classifier Bot processes different types of content in real-time.*
 
