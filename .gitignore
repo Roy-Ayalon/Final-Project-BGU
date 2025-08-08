@@ -74,5 +74,3 @@ models/
 telegram_bot.session
 *.session
 
-# make sure assets are not ignored, even if images are ignored
-!assets/

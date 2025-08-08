@@ -176,27 +176,43 @@ telegram_bot/
 ## 🎬 Demo & Examples
 
 ### Video Demonstration
-🎥 **[Watch the Bot in Action](assets/demo_video.mov)**
+🎥 **Bot in Action**
 
-See how the Telegram Meme Classifier Bot processes different types of content in real-time.
+https://github.com/Roy-Ayalon/telegram_bot/assets/demo_video.mov
+
+*See how the Telegram Meme Classifier Bot processes different types of content in real-time.*
 
 ### Example Classifications
 
 The bot has been tested on various types of content to ensure accurate detection:
 
 #### ✅ Safe Content Examples
-- **Non-offensive meme**: [`not offensive example.png`](assets/not%20offensive%20example.png)
-  - Shows how the bot correctly identifies harmless content
+
+**Non-offensive meme** - Shows how the bot correctly identifies harmless content:
+
+![Safe Content Example](assets/not%20offensive%20example.png)
 
 #### 🚫 Detected Harmful Content Examples
-- **Anti-Arab content**: [`Arab_harmful.png`](assets/Arab_harmful.png)
-- **Racial targeting**: [`harmful_black.png`](assets/harmful_black.png)
-- **Anti-American sentiment**: [`hate_america.png`](assets/hate_america.png)
-- **Anti-Semitic content**: [`jews.png`](assets/jews.png)
-- **Anti-Muslim racism**: [`racist_muslim.png`](assets/racist_muslim.png)
-- **Skin color discrimination**: [`skin_color.png`](assets/skin_color.png)
 
 *Note: These examples are used solely for testing and improving the bot's detection capabilities. The bot helps identify and transform such content into more positive alternatives.*
+
+**Anti-Arab content detection:**
+![Anti-Arab Content](assets/Arab_harmful.png)
+
+**Racial targeting detection:**
+![Racial Targeting](assets/harmful_black.png)
+
+**Anti-American sentiment detection:**
+![Anti-American Content](assets/hate_america.png)
+
+**Anti-Semitic content detection:**
+![Anti-Semitic Content](assets/jews.png)
+
+**Anti-Muslim racism detection:**
+![Anti-Muslim Content](assets/racist_muslim.png)
+
+**Skin color discrimination detection:**
+![Skin Color Discrimination](assets/skin_color.png)
 
 ### Processing Workflow
 1. **Upload** → User sends meme to bot
