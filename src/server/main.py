@@ -15,8 +15,22 @@ import matplotlib.pyplot as plt
 #from accelerate import init_empty_weights, dispatch_model, infer_auto_device_map
 #Hugging Face login
 from huggingface_hub import login
-token = "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"
-login(token=token)
+import os
+
+# Check for HuggingFace token in environment or use the stored one
+token = os.getenv("HF_TOKEN", None)
+
+try:
+    if token:
+        login(token=token)
+        print("Successfully logged in to Hugging Face with environment token")
+    else:
+        # Use the stored token from the previous login
+        print("Using stored HuggingFace token")
+except Exception as e:
+    print(f"Warning: HuggingFace login failed: {e}")
+    print("Some models may not be accessible. Please run 'huggingface-cli login' to update your token.")
+    print("Continuing without HuggingFace authentication...")
 
 #####################################################Classification Models uploading###########################################
 # ***Load the OCR model***
@@ -286,7 +300,7 @@ def add_text_to_image(
     input_image_path,
     upper_text,
     lower_text,
-    font_path="impact.ttf",
+    font_path="/home/proj1/impact.ttf",
     outline_color=(0, 0, 0),
     text_color=(255, 255, 255),
     outline_thickness=2,
@@ -323,7 +337,7 @@ def generate_image(image_description, upper_text, lower_text, num_inf_steps=28, 
         image,
         upper_text=upper_text,
         lower_text=lower_text,
-        font_path="impact.ttf"
+        font_path="/home/proj1/impact.ttf"
     )
     return final_meme
 ##################################################################################################

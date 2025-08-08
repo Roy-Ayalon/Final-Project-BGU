@@ -15,11 +15,10 @@ from datetime import datetime
 import re
 
 # Import your actual AI functions
-try:
-    from .main import classification, meme_manipulation, generate_image
-except ImportError:
-    # Fallback for when running directly
-    from main import classification, meme_manipulation, generate_image
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from main import classification, meme_manipulation, generate_image
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
