@@ -6,6 +6,9 @@ from transformers import AutoModel, AutoTokenizer, pipeline, Gemma3ForConditiona
 from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 from transformers.generation.utils import DynamicCache
 DynamicCache.get_max_length = lambda self: 0
+# Fix for seen_tokens attribute missing in newer transformers versions
+if not hasattr(DynamicCache, 'seen_tokens'):
+    DynamicCache.seen_tokens = property(lambda self: self.get_seq_length() if hasattr(self, 'get_seq_length') else 0)
 from transformers import CLIPProcessor, CLIPModel, AutoModelForSequenceClassification
 from diffusers import StableDiffusion3Pipeline
 from PIL import Image, ImageDraw, ImageFont
@@ -220,7 +223,16 @@ def classification(meme):
     
     # Run text classification with error handling
     try:
-        text_model_result = text_classification(extracted_text)
+        # Ensure text is not empty and properly formatted
+        if not extracted_text or len(extracted_text.strip()) == 0:
+            extracted_text = "No text found"
+        
+        # Call text classification with explicit parameters
+        text_model_result = text_classification(
+            extracted_text[:512],  # Truncate to avoid memory issues
+            padding=True,
+            truncation=True
+        )
         # Interpret model result
         raw_label = text_model_result[0]['label']
         if raw_label.lower() in ['hate', 'offensive', 'toxic', 'label_1']:
