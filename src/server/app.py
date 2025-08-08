@@ -183,23 +183,38 @@ def upload_and_process():
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
 
+
 @app.route('/download/<filename>')
-@app.route('/generated/<filename>')  # Support both endpoints for compatibility
-def serve_file(filename):
-    """Serve uploaded or generated files"""
+def serve_uploaded_file(filename):
+    """Serve uploaded files"""
     try:
         safe_filename = secure_filename(filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_filename)
-        
         if os.path.exists(file_path):
-            logger.info(f"📤 Serving file: {safe_filename}")
+            logger.info(f"📤 Serving uploaded file: {safe_filename}")
             return send_file(file_path, mimetype='image/png', as_attachment=False)
         else:
-            logger.warning(f"❌ File not found: {safe_filename}")
+            logger.warning(f"❌ Uploaded file not found: {safe_filename}")
             return jsonify({"error": "File not found"}), 404
-            
     except Exception as e:
-        logger.error(f"❌ Error serving file {filename}: {e}")
+        logger.error(f"❌ Error serving uploaded file {filename}: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/generated/<filename>')
+def serve_generated_file(filename):
+    """Serve generated files"""
+    try:
+        safe_filename = secure_filename(filename)
+        file_path = os.path.join(app.config['GENERATED_FOLDER'], safe_filename)
+        if os.path.exists(file_path):
+            logger.info(f"📤 Serving generated file: {safe_filename}")
+            return send_file(file_path, mimetype='image/png', as_attachment=False)
+        else:
+            logger.warning(f"❌ Generated file not found: {safe_filename}")
+            return jsonify({"error": "File not found"}), 404
+    except Exception as e:
+        logger.error(f"❌ Error serving generated file {filename}: {e}")
+        return jsonify({"error": "Internal server error"}), 500
         return jsonify({"error": "Internal server error"}), 500
 
 
