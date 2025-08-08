@@ -115,28 +115,35 @@ class MemeBot:
     async def _send_alternative_meme(self, update: Update, context: ContextTypes.DEFAULT_TYPE, meme_path: str) -> None:
         """Download and send the alternative meme"""
         import requests
+        print(f"[DEBUG] meme_path: {meme_path}")
         # Construct the full URL for downloading alternative meme
         if meme_path.startswith("/"):
             new_meme_url = BotConfig.FLASK_SERVER_URL.replace("/upload", meme_path)
         else:
             new_meme_url = BotConfig.FLASK_SERVER_URL.replace("/upload", "/" + meme_path)
-
-        # Log the URL for debugging
-        print(f"Downloading alternative meme from: {new_meme_url}")
+        print(f"[DEBUG] new_meme_url: {new_meme_url}")
 
         temp_filename = os.path.join(BotConfig.TEMP_DIR, "alt_" + os.path.basename(meme_path))
+        print(f"[DEBUG] temp_filename: {temp_filename}")
         try:
+            print(f"[DEBUG] Sending GET request to: {new_meme_url}")
             resp = requests.get(new_meme_url)
+            print(f"[DEBUG] Response status code: {resp.status_code}")
             if resp.status_code == 200:
+                print(f"[DEBUG] Writing image to: {temp_filename}")
                 with open(temp_filename, 'wb') as f:
                     f.write(resp.content)
+                print(f"[DEBUG] Sending photo to Telegram...")
                 with open(temp_filename, 'rb') as alt_img:
                     await update.message.reply_photo(photo=alt_img)
+                print(f"[DEBUG] Removing temp file: {temp_filename}")
                 os.remove(temp_filename)
                 await update.message.reply_text("✨ Here's the new version!")
             else:
+                print(f"[DEBUG] Failed to download meme, HTTP {resp.status_code}")
                 await update.message.reply_text(f"⚠️ Failed to download meme (HTTP {resp.status_code})")
         except Exception as e:
+            print(f"[DEBUG] Exception occurred: {str(e)}")
             await update.message.reply_text(f"⚠️ Error downloading meme: {str(e)}")
     
     async def _ask_for_approval(self, update: Update, context: ContextTypes.DEFAULT_TYPE, question: str) -> None:
