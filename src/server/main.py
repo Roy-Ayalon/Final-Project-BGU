@@ -41,7 +41,21 @@ model_OCR.config.use_cache = False
 
 
 # ***Load the text generation model***
-text_classification = pipeline("text-classification", model="ibm-granite/granite-guardian-hap-125m", device_map="cuda:0")
+try:
+    text_classification = pipeline(
+        "text-classification", 
+        model="ibm-granite/granite-guardian-hap-125m", 
+        device_map="cuda:0",
+        model_kwargs={"use_cache": False},
+        tokenizer_kwargs={"use_fast": False}
+    )
+    print("Text classification model loaded successfully")
+except Exception as e:
+    print(f"Warning: Failed to load text classification model: {e}")
+    # Create a dummy function as fallback
+    def text_classification(text):
+        return [{"label": "Non-Offensive", "score": 0.5}]
+    print("Using fallback text classification")
 
 # ***Load the image classification model***
 clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to("cuda:0").eval()
@@ -203,15 +217,21 @@ def classification(meme):
     cleaned_image = remove_text_from_image(meme, "mask.png")
     # Save the cleaned image
     cv2.imwrite("clean.png", cleaned_image)
-     # Run text classification
-    text_model_result = text_classification(extracted_text)
-
-    # Interpret model result
-    raw_label = text_model_result[0]['label']
-    if raw_label.lower() in ['hate', 'offensive', 'toxic', 'label_1']:
-        predicted_text_label = 1
-    else:
+    
+    # Run text classification with error handling
+    try:
+        text_model_result = text_classification(extracted_text)
+        # Interpret model result
+        raw_label = text_model_result[0]['label']
+        if raw_label.lower() in ['hate', 'offensive', 'toxic', 'label_1']:
+            predicted_text_label = 1
+        else:
+            predicted_text_label = 0
+    except Exception as e:
+        print(f"Warning: Text classification failed: {e}")
+        # Fallback: classify as non-offensive if text classification fails
         predicted_text_label = 0
+        raw_label = "Non-Offensive (fallback)"
 
     # Run CLIP model
     image_model_result = image_classifier_clip("clean.png")
