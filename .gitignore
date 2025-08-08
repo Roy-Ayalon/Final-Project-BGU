@@ -67,14 +67,12 @@ models/
 .ipynb_checkpoints/
 
 # Generated images
-*.jpg
-*.png
-*.jpeg
-*.gif
-!assets/demo/*.png
-!assets/demo/*.jpg
-!assets/demo/*.gif
+
+
 
 # Bot-specific
 telegram_bot.session
 *.session
+
+# make sure assets are not ignored, even if images are ignored
+!assets/

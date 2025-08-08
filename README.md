@@ -157,9 +157,15 @@ telegram_bot/
 │   ├── meme_generation.ipynb  # Generation model testing
 │   ├── main.ipynb            # Main application notebook
 │   └── meme_manipulation.ipynb
-├── assets/
-│   ├── demo/                  # Demo images and videos
-│   └── sample_memes/         # Example memes
+├── assets/                     # Demo content and examples
+│   ├── demo_video.mov         # Demonstration video
+│   ├── Arab_harmful.png       # Example: Harmful content detection
+│   ├── harmful_black.png      # Example: Offensive meme sample
+│   ├── hate_america.png       # Example: Hate speech detection
+│   ├── jews.png               # Example: Anti-Semitic content detection
+│   ├── not offensive example.png # Example: Safe meme sample
+│   ├── racist_muslim.png      # Example: Racist content detection
+│   └── skin_color.png         # Example: Color-based discrimination detection
 ├── config/
 │   └── .env.template         # Environment variables template
 ├── docs/                     # Additional documentation
@@ -167,43 +173,40 @@ telegram_bot/
 └── README.md                # This file
 ```
 
-## 🖼️ Demo
+## 🎬 Demo & Examples
 
-### Bot Interface
-![Bot Demo](assets/demo/bot_screenshot.png)
+### Video Demonstration
+🎥 **[Watch the Bot in Action](assets/demo_video.mov)**
+
+See how the Telegram Meme Classifier Bot processes different types of content in real-time.
+
+### Example Classifications
+
+The bot has been tested on various types of content to ensure accurate detection:
+
+#### ✅ Safe Content Examples
+- **Non-offensive meme**: [`not offensive example.png`](assets/not%20offensive%20example.png)
+  - Shows how the bot correctly identifies harmless content
+
+#### 🚫 Detected Harmful Content Examples
+- **Anti-Arab content**: [`Arab_harmful.png`](assets/Arab_harmful.png)
+- **Racial targeting**: [`harmful_black.png`](assets/harmful_black.png)
+- **Anti-American sentiment**: [`hate_america.png`](assets/hate_america.png)
+- **Anti-Semitic content**: [`jews.png`](assets/jews.png)
+- **Anti-Muslim racism**: [`racist_muslim.png`](assets/racist_muslim.png)
+- **Skin color discrimination**: [`skin_color.png`](assets/skin_color.png)
+
+*Note: These examples are used solely for testing and improving the bot's detection capabilities. The bot helps identify and transform such content into more positive alternatives.*
 
 ### Processing Workflow
-![Workflow](assets/demo/workflow_diagram.png)
+1. **Upload** → User sends meme to bot
+2. **OCR** → Text extraction from image
+3. **Analysis** → AI classification for offensive content
+4. **Decision** → Safe content approved, harmful content flagged
+5. **Generation** → Alternative meme created for harmful content
+6. **Delivery** → User receives safe version with explanation
 
-### Sample Results
-| Original (Offensive) | Generated Alternative |
-|---------------------|----------------------|
-| ![Original](assets/demo/original_meme.jpg) | ![Alternative](assets/demo/alternative_meme.jpg) |
 
-### Video Demo
-🎥 [Watch Full Demo](assets/demo/demo_video.mp4)
-
-## 🔧 Development
-
-### Running Tests
-```bash
-# Install test dependencies
-pip install pytest pytest-asyncio
-
-# Run tests
-pytest tests/
-```
-
-### Development Setup
-```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Run linting
-flake8 src/
-
-# Format code
-black src/
 ```
 
 ### Contributing
@@ -213,41 +216,7 @@ black src/
 4. Add tests
 5. Submit a pull request
 
-## 📈 Performance
 
-### Processing Times (RTX 4090)
-- **OCR Extraction**: ~0.5 seconds
-- **Classification**: ~0.3 seconds  
-- **Image Generation**: ~3-5 seconds
-- **Total Pipeline**: ~4-6 seconds
-
-### Resource Usage
-- **VRAM**: 6-8GB during generation
-- **RAM**: 8-12GB for model loading
-- **Storage**: ~30GB for all models
-
-## 🚀 Deployment
-
-### Production Deployment
-
-#### Option 1: Docker (Recommended)
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
-```
-
-#### Option 2: Manual Deployment
-```bash
-# Set up systemd service for the server
-sudo cp deploy/meme-server.service /etc/systemd/system/
-sudo systemctl enable meme-server
-sudo systemctl start meme-server
-
-# Set up systemd service for the bot
-sudo cp deploy/meme-bot.service /etc/systemd/system/
-sudo systemctl enable meme-bot
-sudo systemctl start meme-bot
-```
 
 ### Scaling
 - Use load balancers for multiple server instances
@@ -290,22 +259,10 @@ tail -f logs/bot.log
 tail -f logs/server.log
 ```
 
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) for the excellent Telegram API wrapper
-- [Hugging Face](https://huggingface.co/) for providing access to state-of-the-art AI models
-- [Stability AI](https://stability.ai/) for Stable Diffusion models
-- [IBM Research](https://www.ibm.com/research) for the Granite Guardian model
-
 ## 📞 Support
 
 For support and questions:
 - 📧 Email: [roy.ayalon@example.com](mailto:roy.ayalon@example.com)
-- 💬 Telegram: [@your_username](https://t.me/your_username)
 - 🐛 Issues: [GitHub Issues](https://github.com/Roy-Ayalon/telegram_bot/issues)
 
 ## 🔮 Roadmap
