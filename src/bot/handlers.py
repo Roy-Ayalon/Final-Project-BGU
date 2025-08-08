@@ -114,20 +114,30 @@ class MemeBot:
     
     async def _send_alternative_meme(self, update: Update, context: ContextTypes.DEFAULT_TYPE, meme_path: str) -> None:
         """Download and send the alternative meme"""
+        import requests
         # Construct the full URL for downloading alternative meme
         if meme_path.startswith("/"):
             new_meme_url = BotConfig.FLASK_SERVER_URL.replace("/upload", meme_path)
         else:
             new_meme_url = BotConfig.FLASK_SERVER_URL.replace("/upload", "/" + meme_path)
-        
+
+        # Log the URL for debugging
+        print(f"Downloading alternative meme from: {new_meme_url}")
+
         temp_filename = os.path.join(BotConfig.TEMP_DIR, "alt_" + os.path.basename(meme_path))
-        urllib.request.urlretrieve(new_meme_url, temp_filename)
-        
-        with open(temp_filename, 'rb') as alt_img:
-            await update.message.reply_photo(photo=alt_img)
-        
-        os.remove(temp_filename)
-        await update.message.reply_text("✨ Here's the new version!")
+        try:
+            resp = requests.get(new_meme_url)
+            if resp.status_code == 200:
+                with open(temp_filename, 'wb') as f:
+                    f.write(resp.content)
+                with open(temp_filename, 'rb') as alt_img:
+                    await update.message.reply_photo(photo=alt_img)
+                os.remove(temp_filename)
+                await update.message.reply_text("✨ Here's the new version!")
+            else:
+                await update.message.reply_text(f"⚠️ Failed to download meme (HTTP {resp.status_code})")
+        except Exception as e:
+            await update.message.reply_text(f"⚠️ Error downloading meme: {str(e)}")
     
     async def _ask_for_approval(self, update: Update, context: ContextTypes.DEFAULT_TYPE, question: str) -> None:
         """Ask user for approval of the generated meme"""
