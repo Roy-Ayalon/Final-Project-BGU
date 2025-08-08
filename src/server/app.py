@@ -1,17 +1,25 @@
 """
 Flask Server for AI Meme Classification and Generation
 This server should run on your CUDA-enabled machine
+Integrates the actual AI models from main.py
 """
 
 import os
-import json
+import sys
 import time
-from typing import Dict, Any, Optional, Tuple
-from flask import Flask, request, jsonify, send_file
-from PIL import Image
-import torch
-from werkzeug.utils import secure_filename
 import logging
+from typing import Dict, Any, Optional
+from flask import Flask, request, jsonify, send_file
+from werkzeug.utils import secure_filename
+from datetime import datetime
+import re
+
+# Import your actual AI functions
+try:
+    from .main import classification, meme_manipulation, generate_image
+except ImportError:
+    # Fallback for when running directly
+    from main import classification, meme_manipulation, generate_image
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -20,8 +28,8 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # Configuration
-UPLOAD_FOLDER = 'uploads'
-GENERATED_FOLDER = 'generated'
+UPLOAD_FOLDER = 'uploaded_images'
+GENERATED_FOLDER = 'generated_images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 # Create necessary directories
@@ -32,101 +40,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['GENERATED_FOLDER'] = GENERATED_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-
-class MemeProcessor:
-    """
-    Main class for processing memes - classification and generation
-    This class should be initialized with your AI models
-    """
-    
-    def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        logger.info(f"Using device: {self.device}")
-        
-        # TODO: Initialize your models here
-        # self.ocr_model = None
-        # self.classification_model = None  
-        # self.generation_model = None
-        self._load_models()
-    
-    def _load_models(self):
-        """Load all AI models"""
-        logger.info("Loading AI models...")
-        
-        # TODO: Implement model loading
-        # Example structure based on your notebooks:
-        """
-        # Load OCR model
-        from transformers import AutoModel, AutoTokenizer
-        self.tokenizer_ocr = AutoTokenizer.from_pretrained('ucaslcl/GOT-OCR2_0', trust_remote_code=True)
-        self.model_ocr = AutoModel.from_pretrained('ucaslcl/GOT-OCR2_0', trust_remote_code=True, 
-                                                  low_cpu_mem_usage=True, device_map='cuda')
-        
-        # Load classification model
-        from transformers import pipeline
-        self.text_classification = pipeline("text-classification", model="ibm-granite/granite-guardian-hap-125m")
-        
-        # Load generation model
-        from diffusers import StableDiffusion3Pipeline
-        self.generation_pipeline = StableDiffusion3Pipeline.from_pretrained(...)
-        """
-        
-        logger.info("Models loaded successfully")
-    
-    def extract_text_from_image(self, image_path: str) -> str:
-        """Extract text from meme using OCR"""
-        try:
-            # TODO: Implement OCR extraction
-            # This should use your GOT-OCR2_0 model
-            extracted_text = "Sample extracted text"  # Placeholder
-            logger.info(f"Extracted text: {extracted_text}")
-            return extracted_text
-        except Exception as e:
-            logger.error(f"Error extracting text: {e}")
-            return ""
-    
-    def classify_meme(self, image_path: str, extracted_text: str) -> Dict[str, Any]:
-        """Classify if meme is offensive"""
-        try:
-            # TODO: Implement classification logic
-            # This should use your granite-guardian model
-            
-            # Placeholder logic
-            is_offensive = len(extracted_text) > 10  # Dummy logic
-            
-            result = {
-                "is_offensive": is_offensive,
-                "confidence": 0.85,
-                "explanation": "This meme contains potentially offensive content." if is_offensive else "This meme appears to be safe."
-            }
-            
-            logger.info(f"Classification result: {result}")
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error in classification: {e}")
-            return {"is_offensive": False, "confidence": 0.0, "explanation": "Classification failed"}
-    
-    def generate_alternative_meme(self, original_image_path: str, extracted_text: str, 
-                                 temperature: float = 0.7) -> Optional[str]:
-        """Generate an alternative, non-offensive meme"""
-        try:
-            # TODO: Implement meme generation
-            # This should use your Stable Diffusion pipeline
-            
-            generated_filename = f"generated_{int(time.time())}.png"
-            generated_path = os.path.join(app.config['GENERATED_FOLDER'], generated_filename)
-            
-            # Placeholder: Copy original image for now
-            from shutil import copy2
-            copy2(original_image_path, generated_path)
-            
-            logger.info(f"Generated alternative meme: {generated_path}")
-            return generated_filename
-            
-        except Exception as e:
-            logger.error(f"Error generating meme: {e}")
-            return None
+logger.info("🚀 AI Processing Server initialized with actual models")
 
 
 def allowed_file(filename: str) -> bool:
@@ -135,23 +49,19 @@ def allowed_file(filename: str) -> bool:
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# Initialize the processor
-processor = MemeProcessor()
-
-
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({
         "status": "healthy",
-        "device": str(processor.device),
+        "message": "AI Processing Server is running",
         "timestamp": time.time()
     })
 
 
 @app.route('/upload', methods=['POST'])
 def upload_and_process():
-    """Main endpoint for meme processing"""
+    """Main endpoint for meme processing - integrates your actual AI pipeline"""
     try:
         # Check if file was uploaded
         if 'image' not in request.files:
@@ -164,85 +74,140 @@ def upload_and_process():
         if not allowed_file(file.filename):
             return jsonify({"error": "Invalid file type"}), 400
         
-        # Save uploaded file
-        filename = secure_filename(file.filename)
-        timestamp = int(time.time())
-        filename = f"{timestamp}_{filename}"
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
+        # Save uploaded file with timestamp
+        timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        filename = f"{timestamp}_{secure_filename(file.filename)}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
         
-        logger.info(f"Received file: {filename}")
+        logger.info(f"📥 Received file: {filename}")
         
-        # Get temperature parameter if provided
+        # Get temperature parameter for generation
         temperature = float(request.form.get('temperature', 0.7))
         
-        # Process the image
-        result = process_meme(file_path, temperature)
+        # Step 1: Classify the meme using your actual classification function
+        predicted = classification(filepath)
         
-        # Clean up uploaded file
-        os.remove(file_path)
+        # Step 2: Handle response based on classification
+        if predicted == 0:  # Non-offensive
+            logger.info("✅ Meme classified as non-offensive")
+            return jsonify({
+                'status': 'Non-Offensive',
+                'message': 'The meme is classified as non-offensive. You can use it freely.',
+                'meme': f'/download/{filename}',
+                'confidence': 0.95
+            })
         
-        return jsonify(result)
-        
+        else:  # Offensive - generate alternative
+            logger.info("🚫 Meme classified as offensive, generating alternative...")
+            
+            # Step 3: Get explanation using your meme_manipulation function
+            explanation_messages = [
+                {
+                    "role": "system",
+                    "content": [{"type": "text", "text": "You are a direct assistant."}]
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "path": filepath},
+                        {"type": "text", "text": "explain shortly why this meme is offensive? start with 'This meme is offensive'"}
+                    ]
+                }
+            ]
+            explanation = meme_manipulation(explanation_messages, temperature=temperature)
+            
+            # Step 4: Generate alternative meme description and text
+            generation_messages = [
+                {
+                    "role": "system",
+                    "content": [{"type": "text", "text": "You are a direct assistant."}]
+                },
+                {
+                    "role": "user", 
+                    "content": [
+                        {"type": "image", "path": filepath},
+                        {"type": "text", "text": "change the meme to be not offensive, give me image description and upper text and lower text only."}
+                    ]
+                }
+            ]
+            meme_convert = meme_manipulation(generation_messages, temperature=temperature)
+            meme_convert = meme_convert.replace("*", "")
+            
+            # Step 5: Parse AI response to extract components
+            lower_match = re.search(r"Lower Text:\s*(.*)", meme_convert, re.DOTALL)
+            lower_text = lower_match.group(1).strip() if lower_match else ""
+            lower_text = lower_text.replace('"', '').replace("'", "")
+            if lower_match:
+                meme_convert = meme_convert[:lower_match.start()]
+            
+            upper_match = re.search(r"Upper Text:\s*(.*)", meme_convert, re.DOTALL)  
+            upper_text = upper_match.group(1).strip() if upper_match else ""
+            upper_text = upper_text.replace('"', '').replace("'", "")
+            if upper_match:
+                meme_convert = meme_convert[:upper_match.start()]
+                
+            desc_match = re.search(r"Image Description:\s*(.*)", meme_convert, re.DOTALL)
+            image_description = desc_match.group(1).strip() if desc_match else ""
+            
+            # Clean up extracted text
+            upper_text = upper_text.strip('"').strip("'")
+            lower_text = lower_text.strip('"').strip("'") 
+            image_description = image_description.strip('"').strip("'")
+            
+            # Step 6: Generate alternative meme using your generate_image function
+            final_meme = generate_image(image_description, upper_text, lower_text)
+            alternative_filename = f"alternative_{filename}"
+            output_path = os.path.join(app.config['UPLOAD_FOLDER'], alternative_filename)
+            final_meme.save(output_path)
+            
+            logger.info(f"✨ Generated alternative meme: {alternative_filename}")
+            
+            # Clean up original file
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            
+            return jsonify({
+                'status': 'Offensive',
+                'explanation': explanation,
+                'message': 'This meme was offensive. A new meme has been generated.',
+                'meme': f'/download/{alternative_filename}',
+                'question': 'Do you like this alternative version?',
+                'confidence': 0.87
+            })
+            
     except Exception as e:
-        logger.error(f"Error processing upload: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+        logger.error(f"❌ Error processing upload: {e}")
+        # Clean up file if it exists
+        if 'filepath' in locals() and os.path.exists(filepath):
+            os.remove(filepath)
+        return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
 
-def process_meme(image_path: str, temperature: float = 0.7) -> Dict[str, Any]:
-    """Process a meme through the full pipeline"""
-    
-    # Step 1: Extract text
-    extracted_text = processor.extract_text_from_image(image_path)
-    
-    # Step 2: Classify
-    classification = processor.classify_meme(image_path, extracted_text)
-    
-    if not classification["is_offensive"]:
-        # Meme is safe
-        return {
-            "status": "Non-Offensive",
-            "message": "This meme is safe to use!",
-            "explanation": classification["explanation"],
-            "confidence": classification["confidence"]
-        }
-    else:
-        # Meme is offensive, generate alternative
-        alternative_filename = processor.generate_alternative_meme(
-            image_path, extracted_text, temperature
-        )
-        
-        if alternative_filename:
-            return {
-                "status": "Offensive",
-                "explanation": classification["explanation"],
-                "meme": f"/generated/{alternative_filename}",
-                "question": "Do you like this alternative version?",
-                "confidence": classification["confidence"]
-            }
-        else:
-            return {
-                "status": "Offensive",
-                "explanation": classification["explanation"],
-                "message": "Unable to generate alternative",
-                "confidence": classification["confidence"]
-            }
-
-
-@app.route('/generated/<filename>')
-def serve_generated_file(filename):
-    """Serve generated meme files"""
+@app.route('/download/<filename>')
+@app.route('/generated/<filename>')  # Support both endpoints for compatibility
+def serve_file(filename):
+    """Serve uploaded or generated files"""
     try:
-        file_path = os.path.join(app.config['GENERATED_FOLDER'], secure_filename(filename))
+        safe_filename = secure_filename(filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_filename)
+        
         if os.path.exists(file_path):
-            return send_file(file_path)
+            logger.info(f"📤 Serving file: {safe_filename}")
+            return send_file(file_path, mimetype='image/png', as_attachment=False)
         else:
+            logger.warning(f"❌ File not found: {safe_filename}")
             return jsonify({"error": "File not found"}), 404
+            
     except Exception as e:
-        logger.error(f"Error serving file: {e}")
+        logger.error(f"❌ Error serving file {filename}: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
 
 if __name__ == '__main__':
-    # Run the server
+    logger.info("🚀 Starting AI Processing Server...")
+    logger.info("🔧 Make sure you have:")
+    logger.info("  - CUDA-enabled GPU")
+    logger.info("  - All AI models downloaded")
+    logger.info("  - impact.ttf font file in the same directory")
     app.run(host='0.0.0.0', port=5002, debug=False)

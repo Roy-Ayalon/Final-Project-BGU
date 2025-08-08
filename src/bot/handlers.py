@@ -114,7 +114,7 @@ class MemeBot:
     
     async def _send_alternative_meme(self, update: Update, context: ContextTypes.DEFAULT_TYPE, meme_path: str) -> None:
         """Download and send the alternative meme"""
-        # Construct the full URL
+        # Construct the full URL for downloading alternative meme
         if meme_path.startswith("/"):
             new_meme_url = BotConfig.FLASK_SERVER_URL.replace("/upload", meme_path)
         else:

@@ -25,6 +25,12 @@ logger = logging.getLogger(__name__)
 def main():
     """Main function to start the bot"""
     try:
+        print("🤖 Telegram Meme Classifier Bot")
+        print("=" * 40)
+        
+        # Validate configuration
+        BotConfig.validate_config()
+        
         # Initialize bot
         bot = MemeBot()
         
@@ -38,11 +44,16 @@ def main():
         application.add_handler(CallbackQueryHandler(bot.handle_temperature, pattern="^temp_"))
         
         # Start bot
-        logger.info("Starting Telegram Meme Classifier Bot...")
+        logger.info("🚀 Starting Telegram Meme Classifier Bot...")
+        logger.info("📱 Send /start to your bot to begin!")
         application.run_polling()
         
+    except ValueError as e:
+        logger.error(f"❌ Configuration error: {e}")
+        logger.error("💡 Please check your .env file and ensure all required variables are set")
+        sys.exit(1)
     except Exception as e:
-        logger.error(f"Failed to start bot: {e}")
+        logger.error(f"❌ Failed to start bot: {e}")
         sys.exit(1)
 
 
