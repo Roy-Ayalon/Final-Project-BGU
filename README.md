@@ -278,8 +278,8 @@ tail -f logs/server.log
 ## 📞 Support
 
 For support and questions:
-- 📧 Email: [roy.ayalon@example.com](mailto:roy.ayalon@example.com)
-- 🐛 Issues: [GitHub Issues](https://github.com/Roy-Ayalon/telegram_bot/issues)
+- 📧 Email: [roy1.ayalon@gmail.com](mailto:roy1.ayalon@gmail.com)
+- 🐛 Issues: [GitHub Issues](https://github.com/Roy-Ayalon/Final-Project-BGU/issues)
 
 ## 🔮 Roadmap
 
